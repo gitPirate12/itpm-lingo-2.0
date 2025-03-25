@@ -9,7 +9,7 @@ function Footer() {
         <p className="text-muted-foreground text-sm text-center mb-4">
           Conceptualized in{" "}
           <Link
-            href="https://galelio.ai"  // Update with actual URL
+            href="https://www.usegalileo.ai/explore"  
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

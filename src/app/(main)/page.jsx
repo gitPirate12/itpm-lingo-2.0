@@ -1,4 +1,4 @@
-import Translator from "./components/Translator";
+import Translator from "../components/Translator";
 
 export default function Home() {
   return <div>
