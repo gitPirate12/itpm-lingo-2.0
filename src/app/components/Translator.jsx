@@ -108,7 +108,7 @@ const Translator = () => {
   }, [translatedText, browserSupportsSpeechRecognition]);
 
   return (
-    <div className="min-h-screen bg-background p-8 font-sans">
+    <div className=" bg-background p-8 font-sans">
       <Toaster position="top-center" richColors />
       
       <Card className="mx-auto max-w-4xl p-6">
