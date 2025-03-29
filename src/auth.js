@@ -8,9 +8,9 @@ import bcrypt from "bcryptjs";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: MongoDBAdapter(clientPromise, {
-    databaseName: "Lingo-DB", // Explicitly specify your DB name
+    databaseName: "Lingo-DB", 
   }),
-  secret: process.env.NEXTAUTH_SECRET, // Use the secret from .env
+  secret: process.env.NEXTAUTH_SECRET, 
   providers: [
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -34,7 +34,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
         try {
           const client = await clientPromise;
-          const db = client.db("Lingo-DB"); // Explicitly use Lingo-DB
+          const db = client.db("Lingo-DB"); 
           const user = await db.collection("users").findOne({ email: credentials.email });
 
           if (!user) return null;
@@ -58,12 +58,12 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log("SignIn:", { user, account, profile }); // Debug
+      console.log("SignIn:", { user, account, profile }); 
       try {
         const client = await clientPromise;
-        const db = client.db("Lingo-DB"); // Explicitly use Lingo-DB
+        const db = client.db("Lingo-DB"); 
         const existingUser = await db.collection("users").findOne({ email: user.email });
-        console.log("Existing User:", existingUser); // Debug
+        console.log("Existing User:", existingUser); 
 
         if (!existingUser) {
           const newUser = await db.collection("users").insertOne({
@@ -120,7 +120,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/sign-in",
   },
-  debug: true, // Enable debug logs to troubleshoot
+  debug: true, 
 });
 
 export const { GET, POST } = handlers;

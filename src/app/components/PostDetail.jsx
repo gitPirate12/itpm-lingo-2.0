@@ -11,7 +11,7 @@ import VoteButtons from "./VoteButtons";
 import ReplyTree from "./ReplyTree";
 import ReplyForm from "./ReplyForm";
 
-const PostDetail = ({ postId, onBack, onVoteUpdate }) => { // Add onVoteUpdate prop
+const PostDetail = ({ postId, onBack, onVoteUpdate }) => { 
   const { data: session } = useSession();
   const [post, setPost] = useState(null);
   const [replies, setReplies] = useState([]);

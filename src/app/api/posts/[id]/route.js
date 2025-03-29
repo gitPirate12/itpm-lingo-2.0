@@ -1,4 +1,4 @@
-import { auth } from "@/auth"; // Adjusted to match your setup
+import { auth } from "@/auth"; 
 import clientPromise from "@/lib/db";
 import { ObjectId } from "mongodb";
 

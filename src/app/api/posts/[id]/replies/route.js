@@ -1,4 +1,4 @@
-import { auth } from "@/auth"; // Adjusted import path to match your structure
+import { auth } from "@/auth"; 
 import clientPromise from "@/lib/db";
 import { ObjectId } from "mongodb";
 

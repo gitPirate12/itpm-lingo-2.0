@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/db"; // Adjust path if needed
+import clientPromise from "@/lib/db"; 
 import validator from "validator";
 import bcrypt from "bcryptjs";
 

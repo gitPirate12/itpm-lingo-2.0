@@ -268,7 +268,7 @@ const Navbar = () => {
         )}
       </nav>
 
-      {/* Add padding to the top of the page content to account for the fixed navbar */}
+      
       <div className="h-16"></div>
     </>
   );

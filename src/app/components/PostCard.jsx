@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import VoteButtons from "./VoteButtons";
 
 const PostCard = ({ post, onVote, onSelect }) => {
-  const { data: session } = useSession(); // Still needed for other session-related logic if any
+  const { data: session } = useSession(); 
 
   return (
     <Card

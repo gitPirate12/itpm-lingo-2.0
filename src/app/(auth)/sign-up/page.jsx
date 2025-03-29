@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react"; // Use import instead of require
+import React, { useState, useEffect } from "react"; 
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { signIn, useSession } from "next-auth/react";

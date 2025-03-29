@@ -1,4 +1,4 @@
-import { auth } from "@/auth"; // Ensure this matches your auth file path
+import { auth } from "@/auth"; 
 import clientPromise from "@/lib/db";
 import { ObjectId } from "mongodb";
 

@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner"; // Assuming you’re using sonner for toasts
+import { toast } from "sonner"; 
 
 const PostForm = ({ onPostCreated }) => {
   const { data: session, status } = useSession(); // Check authentication status
