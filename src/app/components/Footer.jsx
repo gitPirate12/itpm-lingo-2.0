@@ -4,9 +4,9 @@ import { buttonVariants } from "@/components/ui/button";
 
 function Footer() {
   return (
-    <footer className="bg-background border-t mt-auto py-8">
+    <footer className="bg-background border-t mt-auto py-6 sm:py-8">
       <div className="container max-w-4xl mx-auto px-4">
-        <p className="text-muted-foreground text-sm text-center mb-4">
+        <p className="text-muted-foreground text-xs sm:text-sm text-center mb-3 sm:mb-4 leading-relaxed">
           Conceptualized in{" "}
           <Link
             href="https://www.usegalileo.ai/explore"  
@@ -14,7 +14,7 @@ function Footer() {
             rel="noopener noreferrer"
             className={cn(
               buttonVariants({ variant: "link" }),
-              "px-0 text-foreground hover:text-primary font-semibold"
+              "px-0 text-foreground hover:text-primary font-semibold text-xs sm:text-sm"
             )}
           >
             Galelio AI
@@ -26,7 +26,7 @@ function Footer() {
             rel="noopener noreferrer"
             className={cn(
               buttonVariants({ variant: "link" }),
-              "px-0 text-foreground hover:text-primary font-semibold"
+              "px-0 text-foreground hover:text-primary font-semibold text-xs sm:text-sm"
             )}
           >
             Next.js
@@ -38,7 +38,7 @@ function Footer() {
             rel="noopener noreferrer"
             className={cn(
               buttonVariants({ variant: "link" }),
-              "px-0 text-foreground hover:text-primary font-semibold"
+              "px-0 text-foreground hover:text-primary font-semibold text-xs sm:text-sm"
             )}
           >
             shadcn UI
@@ -50,7 +50,7 @@ function Footer() {
             rel="noopener noreferrer"
             className={cn(
               buttonVariants({ variant: "link" }),
-              "px-0 text-foreground hover:text-primary font-semibold"
+              "px-0 text-foreground hover:text-primary font-semibold text-xs sm:text-sm"
             )}
           >
             Tailwind CSS
@@ -58,7 +58,7 @@ function Footer() {
           , this project was final project for the ITPM module.
         </p>
 
-        <p className="text-muted-foreground text-xs text-center">
+        <p className="text-muted-foreground text-[0.7rem] xs:text-xs text-center">
           © 2025 ITPM-LINGO All Rights Reserved.
         </p>
       </div>

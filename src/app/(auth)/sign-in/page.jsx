@@ -1,97 +1,84 @@
 "use client";
 import { useState } from 'react';
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 export default function Page() {
   const { data: session } = useSession();
+  const router = useRouter();
 
   if (session?.user) {
-    return (
-      <div className="min-h-screen bg-white text-gray-900 p-8">
-        <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-          <pre className="whitespace-pre-wrap mb-4 p-4 bg-gray-50 rounded-lg">
-            {JSON.stringify(session.user, null, 2)}
-          </pre>
-          <button
-            onClick={() => signOut()}
-            className="w-full bg-gray-900 text-white py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Sign Out
-          </button>
-        </div>
-      </div>
-    );
+    router.push("/"); // Redirect to home if already logged in
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <SignIn />
+      <SignInForm />
     </div>
   );
 }
 
-function SignIn() {
+function SignInForm() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     const result = await signIn('credentials', {
       redirect: false,
       email,
       password,
+      callbackUrl: "/" // Redirect to home after successful login
     });
 
     if (result?.error) {
-      setError(result.error);
-      toast.error('Login failed');
-      setLoading(false);
+      toast.error('Login failed', {
+        description: result.error,
+        position: 'top-center'
+      });
     } else {
-      toast.success('Login successful');
+      toast.success('Login successful', {
+        position: 'top-center'
+      });
       router.push("/");
     }
+    setLoading(false);
   };
 
   return (
-    <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8 border border-gray-200">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">ITPM-LINGO</h1>
-        <p className="text-gray-600">Sign in to continue</p>
+    <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+      <div className="text-center mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">ITPM-LINGO</h1>
+        <p className="text-gray-600 text-sm md:text-base">Sign in to continue</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="bg-red-50 text-red-700 p-3 rounded-lg border border-red-200">
-            {error}
-          </div>
-        )}
-
-        <div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Email</label>
           <input
             type="email"
-            placeholder="Email"
+            placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             required
           />
         </div>
 
-        <div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Password</label>
           <input
             type="password"
-            placeholder="Password"
+            placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             required
           />
         </div>
@@ -99,17 +86,26 @@ function SignIn() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:hover:bg-gray-900"
+          className="w-full bg-gray-900 text-white py-2 md:py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base"
         >
-          {loading ? 'Signing In...' : 'Sign In with Email'}
+          {loading ? (
+            <>
+              <svg className="animate-spin h-4 w-4 md:h-5 md:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Signing in...
+            </>
+          ) : (
+            "Sign In"
+          )}
         </button>
 
-        {/* New Sign Up Button */}
-        <div className="text-center pt-4">
+        <div className="text-center pt-2">
           <button
             type="button"
             onClick={() => router.push('/sign-up')}
-            className="text-gray-600 hover:text-gray-900 text-sm font-medium"
+            className="text-gray-600 hover:text-gray-900 text-xs md:text-sm font-medium"
           >
             Don't have an account?{' '}
             <span className="text-gray-900 font-semibold underline">
@@ -119,21 +115,21 @@ function SignIn() {
         </div>
       </form>
 
-      <div className="relative my-8">
+      <div className="relative my-4 md:my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
+          <div className="w-full border-t border-gray-300/50"></div>
         </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="bg-white px-2 text-gray-600">Or continue with</span>
+        <div className="relative flex justify-center text-xs md:text-sm">
+          <span className="bg-white px-2 text-gray-500">Or continue with</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2 md:gap-3">
         <button
-          onClick={() => signIn('google')}
-          className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg py-3 px-4 hover:bg-gray-50 transition-colors"
+          onClick={() => signIn('google', { callbackUrl: '/' })}
+          className="flex items-center justify-center gap-1 md:gap-2 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg py-2 px-2 md:py-3 md:px-4 transition-all duration-200 text-xs md:text-sm"
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24">
             <path
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
               fill="#4285F4"
@@ -155,10 +151,10 @@ function SignIn() {
         </button>
 
         <button
-          onClick={() => signIn('github')}
-          className="flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg py-3 px-4 hover:bg-gray-50 transition-colors"
+          onClick={() => signIn('github', { callbackUrl: '/' })}
+          className="flex items-center justify-center gap-1 md:gap-2 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg py-2 px-2 md:py-3 md:px-4 transition-all duration-200 text-xs md:text-sm"
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24">
             <path
               fillRule="evenodd"
               clipRule="evenodd"

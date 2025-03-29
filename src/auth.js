@@ -1,118 +1,126 @@
-import NextAuth from "next-auth"
-import Google from "next-auth/providers/google"
-import GitHub from "next-auth/providers/github"
-import Credentials from "next-auth/providers/credentials"
-import connectDB from "@/lib/db"
-import User from "@/app/models/User"
-import bcrypt from "bcryptjs"
-
-// Initialize DB connection
-connectDB().catch(err => console.error("DB connection error:", err))
+import NextAuth from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import clientPromise from "@/lib/db";
+import bcrypt from "bcryptjs";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
+  adapter: MongoDBAdapter(clientPromise, {
+    databaseName: "Lingo-DB", // Explicitly specify your DB name
+  }),
+  secret: process.env.NEXTAUTH_SECRET, // Use the secret from .env
   providers: [
-    Google({ 
+    GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: true
     }),
-    GitHub({ 
+    GitHubProvider({
       clientId: process.env.AUTH_GITHUB_ID,
-      clientSecret: process.env.AUTH_GITHUB_SECRET
+      clientSecret: process.env.AUTH_GITHUB_SECRET,
+      allowDangerousEmailAccountLinking: true
     }),
-    Credentials({
+    CredentialsProvider({
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          return null;
         }
-        
+
         try {
-          await connectDB()
-          const user = await User.findOne({ email: credentials.email })
-            .select("+password")
-          
-          if (!user) return null
-          
-          const isValid = await bcrypt.compare(
-            credentials.password, 
-            user.password
-          )
-          
-          if (!isValid) return null
-          
+          const client = await clientPromise;
+          const db = client.db("Lingo-DB"); // Explicitly use Lingo-DB
+          const user = await db.collection("users").findOne({ email: credentials.email });
+
+          if (!user) return null;
+
+          const isValid = await bcrypt.compare(credentials.password, user.password);
+
+          if (!isValid) return null;
+
           return {
             id: user._id.toString(),
             email: user.email,
             name: user.name,
-            image: user.image
-          }
+            image: user.image,
+          };
         } catch (error) {
-          console.error("Authorization error:", error)
-          return null
+          console.error("Authorization error:", error);
+          return null;
         }
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
+      console.log("SignIn:", { user, account, profile }); // Debug
       try {
-        await connectDB()
-        
-        // Only handle OAuth providers
-        if (account?.provider === "google" || account?.provider === "github") {
-          const existingUser = await User.findOne({ email: user.email })
-          
-          if (!existingUser) {
-            // Create new user if doesn't exist
-            await User.create({
-              email: user.email,
-              name: user.name,
-              image: user.image,
-              // For OAuth users, no password is required
-            })
-          } else {
-            // Update existing user's info
-            await User.findByIdAndUpdate(existingUser._id, {
-              name: user.name,
-              image: user.image
-            })
-          }
+        const client = await clientPromise;
+        const db = client.db("Lingo-DB"); // Explicitly use Lingo-DB
+        const existingUser = await db.collection("users").findOne({ email: user.email });
+        console.log("Existing User:", existingUser); // Debug
+
+        if (!existingUser) {
+          const newUser = await db.collection("users").insertOne({
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            provider: account.provider,
+            createdAt: new Date(),
+          });
+          user.id = newUser.insertedId.toString();
+          return true;
+        } else {
+          await db.collection("users").updateOne(
+            { _id: existingUser._id },
+            {
+              $set: {
+                name: user.name || existingUser.name,
+                image: user.image || existingUser.image,
+                provider: account.provider,
+                lastLogin: new Date(),
+              },
+            }
+          );
+          user.id = existingUser._id.toString();
+          return true;
         }
-        return true
       } catch (error) {
-        console.error("SignIn callback error:", error)
-        return false
+        console.error("SignIn callback error:", error);
+        return false;
       }
     },
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-        token.email = user.email
-        token.name = user.name
-        token.picture = user.image
+    async jwt({ token, user, trigger }) {
+      if (trigger === "signIn" && user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.picture = user.image;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id
-        session.user.email = token.email
-        session.user.name = token.name
-        session.user.image = token.picture
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.image = token.picture;
       }
-      return session
-    }
+      return session;
+    },
   },
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60 // 30 days
   },
   pages: {
-    signIn: "/auth/signin",
-    error: "/auth/error"
+    signIn: "/sign-in",
   },
-  secret: process.env.NEXTAUTH_SECRET
-})
+  debug: true, // Enable debug logs to troubleshoot
+});
+
+export const { GET, POST } = handlers;
